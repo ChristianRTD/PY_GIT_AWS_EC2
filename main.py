@@ -6,9 +6,7 @@ app = Flask(__name__)
 def hello():
     return "¡Hola, Mundo!"
 
-@app.route('/progra')
-def progra():
-    return "¡PROGRAMACION DISTRIBUIDA!"
+
 
 
 
