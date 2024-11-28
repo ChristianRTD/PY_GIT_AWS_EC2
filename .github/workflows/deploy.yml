@@ -25,13 +25,9 @@ jobs:
 
     - name: Deploy to EC2
       env:
-        
-        SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-        REMOTE_HOST: ${{ secrets.HOST_DNS }}
-
-        REMOTE_USER: ${{ secrets.EC2_USER }}
-        TARGET: ${{ secrets.TARGET_DIR }}
-        
+        AWS_HOST: ${{ secrets.AWS_HOST }}         # IP pública de la instancia EC2
+        AWS_USERNAME: ${{ secrets.AWS_USERNAME }} # Usuario de la instancia (ejemplo: ec2-user)
+        AWS_KEY: ${{ secrets.AWS_KEY }}           # Llave SSH privada para acceder a EC2
       run: |
         echo "${AWS_KEY}" > deploy_key.pem
         chmod 600 deploy_key.pem
