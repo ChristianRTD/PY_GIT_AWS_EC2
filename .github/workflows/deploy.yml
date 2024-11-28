@@ -1,0 +1,43 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main  # Desencadena la acción al hacer push a la rama 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'  # Cambia según la versión que uses
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Deploy to EC2
+      env:
+        AWS_HOST: ${{ secrets.AWS_HOST }}         # IP pública de la instancia EC2
+        AWS_USERNAME: ${{ secrets.AWS_USERNAME }} # Usuario de la instancia (ejemplo: ec2-user)
+        AWS_KEY: ${{ secrets.AWS_KEY }}           # Llave SSH privada para acceder a EC2
+      run: |
+        echo "${AWS_KEY}" > deploy_key.pem
+        chmod 600 deploy_key.pem
+        ssh -o StrictHostKeyChecking=no -i deploy_key.pem $AWS_USERNAME@$AWS_HOST << 'EOF'
+          # Comandos para configurar y ejecutar el proyecto en la instancia EC2
+          cd /home/$AWS_USERNAME/my_project || mkdir /home/$AWS_USERNAME/my_project && cd /home/$AWS_USERNAME/my_project
+          git clone https://github.com/usuario/repositorio.git . || git pull origin main
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          nohup python app.py > output.log 2>&1 &
+          exit
+
